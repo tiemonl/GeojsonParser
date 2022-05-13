@@ -5,9 +5,9 @@ import java.io.File
 fun main(args: Array<String>) {
     val format = Json { prettyPrint = true }
 
-    val locations = format.decodeFromString<List<Location>>(getResourceAsText("src/main/resources/points.json"))
+    val locations = format.decodeFromString<Route>(getResourceAsText("src/main/resources/points.json"))
 
-    val output = format.encodeToString(locations.toGeoJson())
+    val output = format.encodeToString(locations.route.toGeoJson())
     println(output)
     saveToFile(output)
 }
@@ -16,12 +16,14 @@ fun saveToFile(output: String) = File("src/main/resources/output.json").printWri
         out.println(output)
 }
 
-fun List<Location>.toGeoJson(): GeoJson {
+fun List<List<Location>>.toGeoJson(): GeoJson {
     val coordinates = mutableListOf<List<Double>>()
     this.forEach {
-        coordinates.add(
-            listOf(it.long, it.lat)
-        )
+        it.forEach {
+            coordinates.add(
+                listOf(it.longitude, it.latitude)
+            )
+        }
     }
     return GeoJson(
         type = "FeatureCollection", features =
